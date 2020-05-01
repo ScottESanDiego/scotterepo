@@ -254,7 +254,7 @@ src_install() {
 		# This file is tweaked with the appropriate video group in
 		# pkg_preinst, see bug #491414
 		insinto /etc/modprobe.d
-		newins "${FILESDIR}"/nvidia-430.conf nvidia.conf
+		newins "${FILESDIR}"/nvidia-440.conf nvidia.conf
 
 		if use uvm; then
 			doins "${FILESDIR}"/nvidia-rmmod.conf
