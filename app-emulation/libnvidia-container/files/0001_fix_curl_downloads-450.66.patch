@@ -1,0 +1,68 @@
+diff --git a/Makefile b/Makefile
+index 0af8123..de22ed5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -13,12 +13,12 @@ WITH_SECCOMP ?= yes
+ 
+ ##### Global definitions #####
+ 
+-export prefix      = /usr/local
++export prefix      = /usr
+ export exec_prefix = $(prefix)
+ export bindir      = $(exec_prefix)/bin
+-export libdir      = $(exec_prefix)/lib
++export libdir      = $(exec_prefix)/lib64
+ export docdir      = $(prefix)/share/doc
+-export libdbgdir   = $(prefix)/lib/debug$(libdir)
++export libdbgdir   = $(prefix)/lib64/debug$(libdir)
+ export includedir  = $(prefix)/include
+ export pkgconfdir  = $(libdir)/pkgconfig
+ 
+@@ -111,9 +111,9 @@ CFLAGS   := -std=gnu11 -O2 -g -fdata-sections -ffunction-sections -fstack-protec
+             -Wall -Wextra -Wcast-align -Wpointer-arith -Wmissing-prototypes -Wnonnull \
+             -Wwrite-strings -Wlogical-op -Wformat=2 -Wmissing-format-attribute -Winit-self -Wshadow \
+             -Wstrict-prototypes -Wunreachable-code -Wconversion -Wsign-conversion \
+-            -Wno-unknown-warning-option -Wno-format-extra-args -Wno-gnu-alignof-expression $(CFLAGS)
++            -Wno-format-extra-args -I/usr/include/tirpc $(CFLAGS)
+ LDFLAGS  := -Wl,-zrelro -Wl,-znow -Wl,-zdefs -Wl,--gc-sections $(LDFLAGS)
+-LDLIBS   := $(LDLIBS)
++LDLIBS   := $(LDLIBS) -ltirpc -lpthread
+ 
+ # Library flags (recursively expanded to handle target-specific flags)
+ LIB_CPPFLAGS       = -DNV_LINUX -isystem $(DEPS_DIR)$(includedir) -include $(BUILD_DEFS)
+diff --git a/mk/elftoolchain.mk b/mk/elftoolchain.mk
+index 7484fde..4432298 100644
+--- a/mk/elftoolchain.mk
++++ b/mk/elftoolchain.mk
+@@ -34,7 +34,7 @@ export CFLAGS   := -O2 -g -fdata-sections -ffunction-sections -fstack-protector
+ 
+ $(SRCS_DIR)/.download_stamp:
+ 	$(MKDIR) -p $(SRCS_DIR)
+-	$(CURL) --progress-bar -fSL $(URL) | \
++	cat ${DISTDIR}/$(PREFIX).tar.bz2 | \
+ 	$(TAR) -C $(SRCS_DIR) --strip-components=1 -xj $(addprefix $(PREFIX)/,mk common libelf)
+ 	@touch $@
+ 
+diff --git a/mk/nvidia-modprobe.mk b/mk/nvidia-modprobe.mk
+index 2df0ac5..b4b3c30 100644
+--- a/mk/nvidia-modprobe.mk
++++ b/mk/nvidia-modprobe.mk
+@@ -6,7 +6,7 @@ include $(MAKE_DIR)/common.mk
+ 
+ ##### Source definitions #####
+ 
+-VERSION        := 396.51
++VERSION        := 450.66
+ PREFIX         := nvidia-modprobe-$(VERSION)
+ URL            := https://github.com/NVIDIA/nvidia-modprobe/archive/$(VERSION).tar.gz
+ 
+@@ -31,7 +31,7 @@ LIB_OBJS := $(LIB_SRCS:.c=.o)
+ 
+ $(SRCS_DIR)/.download_stamp:
+ 	$(MKDIR) -p $(SRCS_DIR)
+-	$(CURL) --progress-bar -fSL $(URL) | \
++	cat ${DISTDIR}/${VERSION}.tar.gz | \
+ 	$(TAR) -C $(SRCS_DIR) --strip-components=1 -xz $(PREFIX)/modprobe-utils
+ 	@touch $@
+
+
