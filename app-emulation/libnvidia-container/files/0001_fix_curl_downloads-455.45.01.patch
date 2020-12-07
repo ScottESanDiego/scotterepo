@@ -52,7 +52,7 @@ index 2df0ac5..b4b3c30 100644
  ##### Source definitions #####
  
 -VERSION        := 396.51
-+VERSION        := 455.38
++VERSION        := 455.45.01
  PREFIX         := nvidia-modprobe-$(VERSION)
  URL            := https://github.com/NVIDIA/nvidia-modprobe/archive/$(VERSION).tar.gz
  
