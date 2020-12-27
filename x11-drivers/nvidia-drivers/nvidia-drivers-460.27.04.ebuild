@@ -19,12 +19,11 @@ SRC_URI="
 "
 
 EMULTILIB_PKG="true"
-KEYWORDS="-* ~amd64"
+KEYWORDS="-* amd64"
 LICENSE="GPL-2 NVIDIA-r2"
-SLOT="0/${PV%.*}"
+SLOT="0/${PV%%.*}"
 
-IUSE="unlock acpi compat +driver gtk3 kernel_FreeBSD kernel_linux opencl +kms +libglvnd multilib static-libs +tools uvm wayland +X"
-
+IUSE="unlock opencl compat +driver gtk3 kernel_FreeBSD kernel_linux +kms +libglvnd multilib static-libs +tools uvm wayland +X"
 REQUIRED_USE="
 	tools? ( X )
 	static-libs? ( tools )
@@ -41,7 +40,7 @@ COMMON="
 			x11-libs/gtk+:3
 		)
 		x11-libs/cairo
-		x11-libs/gdk-pixbuf[X]
+		x11-libs/gdk-pixbuf
 		x11-libs/gtk+:2
 		x11-libs/libX11
 		x11-libs/libXext
@@ -51,12 +50,11 @@ COMMON="
 		x11-libs/pango[X]
 	)
 	X? (
-		!libglvnd? ( >=app-eselect/eselect-opengl-1.0.9 )
-		libglvnd? (
-			media-libs/libglvnd[${MULTILIB_USEDEP}]
-			!app-eselect/eselect-opengl
-		)
+		>=x11-libs/libvdpau-1.0[${MULTILIB_USEDEP}]
 		app-misc/pax-utils
+		libglvnd? (
+			media-libs/libglvnd[X,${MULTILIB_USEDEP}]
+		)
 	)
 "
 DEPEND="
@@ -66,14 +64,12 @@ DEPEND="
 "
 RDEPEND="
 	${COMMON}
-	tools? ( !media-video/nvidia-settings )
 	opencl? ( >=virtual/opencl-3 )
 	wayland? ( dev-libs/wayland[${MULTILIB_USEDEP}] )
 	X? (
 		<x11-base/xorg-server-1.20.99:=
 		>=x11-libs/libX11-1.6.2[${MULTILIB_USEDEP}]
 		>=x11-libs/libXext-1.3.2[${MULTILIB_USEDEP}]
-		>=x11-libs/libvdpau-1.0[${MULTILIB_USEDEP}]
 		sys-libs/zlib[${MULTILIB_USEDEP}]
 	)
 	kernel_linux? ( net-libs/libtirpc )
@@ -83,7 +79,7 @@ S=${WORKDIR}/
 PATCHES=(
 	"${FILESDIR}"/${PN}-440.26-locale.patch
 )
-NV_KV_MAX_PLUS="5.8"
+NV_KV_MAX_PLUS="5.11"
 CONFIG_CHECK="
 	!DEBUG_MUTEXES
 	~!I2C_NVIDIA_GPU
@@ -122,10 +118,10 @@ pkg_setup() {
 		# expects x86_64 or i386 and then converts it to x86
 		# later on in the build process
 		BUILD_FIXES="ARCH=$(uname -m | sed -e 's/i.86/i386/')"
-	fi
 
-	if use kernel_linux && kernel_is lt 2 6 9; then
-		eerror "You must build this against 2.6.9 or higher kernels."
+		if kernel_is lt 2 6 9; then
+			eerror "You must build this against 2.6.9 or higher kernels."
+		fi
 	fi
 
 	# set variables to where files are in the package structure
@@ -432,7 +428,7 @@ src_install() {
 
 	if has_multilib_profile && use multilib; then
 		local OABI=${ABI}
-		for ABI in $(get_install_abis); do
+		for ABI in $(multilib_get_enabled_abis); do
 			src_install-libs
 		done
 		ABI=${OABI}
@@ -459,6 +455,8 @@ src_install() {
 	fi
 
 	readme.gentoo_create_doc
+
+	dodoc supported-gpus
 
 	docinto html
 	dodoc -r ${NV_DOC}/html/*
@@ -490,7 +488,6 @@ src_install-libs() {
 			"libnvidia-compiler.so.${NV_SOVER}"
 			"libnvidia-eglcore.so.${NV_SOVER}"
 			"libnvidia-encode.so.${NV_SOVER}"
-			"libnvidia-fatbinaryloader.so.${NV_SOVER}"
 			"libnvidia-fbc.so.${NV_SOVER}"
 			"libnvidia-glcore.so.${NV_SOVER}"
 			"libnvidia-glsi.so.${NV_SOVER}"
@@ -512,10 +509,10 @@ src_install-libs() {
 			)
 		fi
 
-		if use wayland && has_multilib_profile && [[ ${ABI} == "amd64" ]];
+		if use wayland && [[ ${ABI} == "amd64" ]];
 		then
 			NV_GLX_LIBRARIES+=(
-				"libnvidia-egl-wayland.so.1.1.4"
+				"libnvidia-egl-wayland.so.1.1.5"
 			)
 		fi
 
@@ -532,10 +529,11 @@ src_install-libs() {
 			)
 		fi
 
-		if use kernel_linux && has_multilib_profile && [[ ${ABI} == "amd64" ]];
+		if use kernel_linux && [[ ${ABI} == "amd64" ]];
 		then
 			NV_GLX_LIBRARIES+=(
 				"libnvidia-cbl.so.${NV_SOVER}"
+				"libnvidia-ngx.so.${NV_SOVER}"
 				"libnvidia-rtcore.so.${NV_SOVER}"
 				"libnvoptix.so.${NV_SOVER}"
 			)
@@ -576,11 +574,6 @@ pkg_preinst() {
 
 pkg_postinst() {
 	use driver && use kernel_linux && linux-mod_pkg_postinst
-
-	# Switch to the nvidia implementation
-	if ! use libglvnd; then
-		use X && "${ROOT}"/usr/bin/eselect opengl set --use-old nvidia
-	fi
 
 	readme.gentoo_print_elog
 
@@ -624,15 +617,7 @@ pkg_postinst() {
 	fi
 }
 
-pkg_prerm() {
-	if ! use libglvnd; then
-		use X && "${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
-	fi
-}
-
 pkg_postrm() {
 	use driver && use kernel_linux && linux-mod_pkg_postrm
-	if ! use libglvnd; then
-		use X && "${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
-	fi
 }
+
