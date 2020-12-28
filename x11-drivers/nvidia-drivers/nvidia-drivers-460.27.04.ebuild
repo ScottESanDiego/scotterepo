@@ -456,7 +456,7 @@ src_install() {
 
 	readme.gentoo_create_doc
 
-	dodoc supported-gpus
+	dodoc -r supported-gpus
 
 	docinto html
 	dodoc -r ${NV_DOC}/html/*
