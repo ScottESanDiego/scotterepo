@@ -22,7 +22,7 @@ LICENSE="GPL-2 NVIDIA-r2"
 SLOT="0/${PV%%.*}"
 # TODO: for arm64, keyword virtual/opencl on arm64
 KEYWORDS="-* ~amd64"
-IUSE="unlock opencl compat +driver +kms multilib static-libs +tools uvm wayland +X"
+IUSE="unlock docker opencl compat +driver +kms multilib static-libs +tools uvm wayland +X"
 REQUIRED_USE="
 	tools? ( X )
 	static-libs? ( tools )"
@@ -241,34 +241,13 @@ src_install() {
 	donvidia libnvcuvid.so.${PV}
 	donvidia libnvidia-encode.so.${PV}
 
-
 	# NVIDIA Extra Drivers
-	# Mandatory for nvidia-smi
-	donvidia libnvidia-ml.so.${PV}
-	# No Dependencies
-	donvidia libcuda.so.${PV}
-	donvidia libnvidia-allocator.so.${PV}
-	donvidia libnvidia-cbl.so.${PV}
-	donvidia libnvidia-glcore.so.${PV}
-	donvidia libnvidia-glvkspirv.so.${PV}
-	donvidia libnvidia-glsi.so.${PV}
-	donvidia libnvidia-opticalflow.so.${PV}
-	donvidia libnvidia-opencl.so.${PV}
-	donvidia libnvidia-ptxjitcompiler.so.${PV}
-	donvidia libvdpau_nvidia.so.${PV}
-	donvidia libnvoptix.so.${PV}
-	donvidia libnvidia-tls.so.${PV}
-	donvidia libnvidia-rtcore.so.${PV}
-	# Used by nvidia-container-cli
-	donvidia libnvidia-compiler.so.${PV}
-	donvidia libnvidia-eglcore.so.${PV}
-	donvidia libnvidia-ifr.so.${PV}
-	donvidia libGLX_nvidia.so.${PV}
-	donvidia libEGL_nvidia.so.${PV}
-	donvidia libGLESv2_nvidia.so.${PV}
-	donvidia libGLESv1_CM_nvidia.so.${PV}
+	if use docker; then
+		donvidia libnvidia-allocator.so.${PV}
+		donvidia libnvidia-opticalflow.so.${PV}
+	fi
 
-	if use X; then
+	if use X || use docker; then
 		# Xorg DDX driver
 		exeinto /usr/$(get_libdir)/xorg/modules/drivers
 		doexe nvidia_drv.so
@@ -403,7 +382,7 @@ src_install-libs() {
 		nv_libdir="${S}"/32
 	fi
 
-	if use X; then
+	if use X || use docker; then
 		NV_GLX_LIBRARIES=(
 			"libEGL_nvidia.so.${PV} ${GL_ROOT}"
 			"libGLESv1_CM_nvidia.so.${PV} ${GL_ROOT}"
