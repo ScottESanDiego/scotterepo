@@ -10,10 +10,11 @@ KEYWORDS="*"
 
 LICENSE="Apache-2.0"
 SLOT="0"
-IUSE="+seccomp"
+IUSE=""
 
-DEPEND="$COMMON_DEPEND >=dev-lang/go-1.4:="
-RDEPEND="$COMMON_DEPEND seccomp? ( sys-libs/libseccomp )"
+DEPEND="$COMMON_DEPEND >=dev-lang/go-1.4
+	<dev-lang/go-1.16
+	>=app-emulation/nvidia-container-toolkit-1.4.2"
 
 TARBALL_PV=${PV}
 
