@@ -8,7 +8,7 @@ DESCRIPTION="Nuvoton NCT6687-R module for Linux kernel"
 HOMEPAGE="https://github.com/Fred78290/nct6687d"
 COMMIT="0ee35ed9541bde22fe219305d1647b51ed010c5e"
 SRC_URI="https://github.com/Fred78290/nct6687d/archive/${COMMIT}.tar.gz -> ${P}.tar.gz"
-S="${WORKDIR}/${PN}_linux-${COMMIT}/driver"
+S="${WORKDIR}/${PN}-${COMMIT}"
 
 LICENSE="GPL-2"
 SLOT=0
