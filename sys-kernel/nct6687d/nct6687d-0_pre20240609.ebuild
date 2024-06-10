@@ -19,3 +19,7 @@ src_compile() {
 	local modargs=( KERNELDIR=${KERNEL_DIR} )
 	linux-mod-r1_src_compile
 }
+
+src_install() {
+	linux_domodule ${KV_FULL}/nct6687.ko
+}
