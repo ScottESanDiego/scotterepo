@@ -17,9 +17,6 @@ KEYWORDS="~amd64 ~x86"
 src_compile() {
 	local modlist=( nct6687 )
 	local modargs=( KERNELDIR=${KERNEL_DIR} )
+	cp ${FILESDIR}/Makefile.gentoo ${S}/Makefile
 	linux-mod-r1_src_compile
-}
-
-src_install() {
-	linux_domodule ${KV_FULL}/nct6687.ko
 }
