@@ -20,7 +20,6 @@ HOMEPAGE="https://github.com/ScottESanDiego/transmission-filesync"
 
 LICENSE="Apache-2.0 BSD BSD-2 ISC MIT"
 SLOT="0"
-IUSE="static"
 BDEPEND="dev-lang/go"
 
 DEPEND="${RDEPEND}"
