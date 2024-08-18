@@ -8,30 +8,29 @@ inherit go-module
 
 EGO_PN="github.com/ScottESanDiego/${PN}"
 
-KEYWORDS="~amd64"
+DESCRIPTION="Remove files from a directory if they aren't actively used by qBittorrent"
+HOMEPAGE="https://github.com/ScottESanDiego/qbittorrent-filesync"
 
 SRC_URI="https://github.com/ScottESanDiego/qbittorrent-filesync/archive/refs/tags/${PV}.tar.gz -> ${P}.tar.gz
 		${EGO_SUM_SRC_URI}"
 
-RESTRICT="mirror network-sandbox"
-
-DESCRIPTION="Remove files from a directory if they aren't actively used by qBittorrent"
-HOMEPAGE="https://github.com/ScottESanDiego/qbittorrent-filesync"
-
+S="${G}"
 LICENSE="Apache-2.0 BSD BSD-2 ISC MIT"
 SLOT="0"
+KEYWORDS="~amd64"
+
+RESTRICT="mirror network-sandbox"
+
 BDEPEND="dev-lang/go"
 
 DEPEND="${RDEPEND}"
 
 QA_PRESTRIPPED="usr/bin/qbittorrent-filesync"
 
-G="${WORKDIR}/${P}"
-S="${G}"
-
+GODIR="${WORKDIR}/${P}"
 
 src_compile() {
-	GOPATH="${G}" \
+	GOPATH="${GODIR}" \
 
 	BUILD_COMMAND="go build -v -work -x -a -ldflags -s"
 	${BUILD_COMMAND} || die
