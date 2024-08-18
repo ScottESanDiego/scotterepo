@@ -4,9 +4,7 @@
 <maintainer type="person">
 <email>scotte@warped.com</email>
 </maintainer>
-<use>
-	<flag name="static">Statically link libpcap</flag>
-</use>
 <longdescription lang="en">
+	Remove files from a directory if they aren't actively used by Transmission
 </longdescription>
 </pkgmetadata>
