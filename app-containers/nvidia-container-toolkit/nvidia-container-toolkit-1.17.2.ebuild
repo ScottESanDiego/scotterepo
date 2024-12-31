@@ -31,10 +31,6 @@ RDEPEND="
 	sys-libs/libnvidia-container:0/${PV}
 "
 
-#PATCHES=(
-#	"${FILESDIR}/extldflags-1.16.1.patch"
-#)
-
 src_compile() {
 	emake binaries
 }
