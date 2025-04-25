@@ -4,7 +4,7 @@
 
 EAPI=7
 
-inherit golang-build golang-vcs-snapshot
+inherit go-module
 
 EGO_PN="github.com/markusressel/${PN}"
 
@@ -26,11 +26,12 @@ G="${WORKDIR}/${P}"
 S="${G}/src/${EGO_PN}"
 
 src_compile() {
-	SOURCE_DATE_EPOCH=$(date +%s || die)
-	DATE=$(date -u -d @${SOURCE_DATE_EPOCH} +"%Y-%m-%dT%H:%M:%SZ" || die)
+	#SOURCE_DATE_EPOCH=$(date +%s || die)
+	#DATE=$(date -u -d @${SOURCE_DATE_EPOCH} +"%Y-%m-%dT%H:%M:%SZ" || die)
 
-	BUILD_COMMAND='go build -o fan2go -x -v -a -tags netgo -ldflags -s .'
-	${BUILD_COMMAND} || die
+	#BUILD_COMMAND='go build -o fan2go -x -v -a -tags netgo -ldflags -s .'
+	#${BUILD_COMMAND} || die
+	#OUTPUT_BIN=$S/bin/fan2go
 
 	# Here's what the go-module version used to build.  We're ignoring it. :-)
 #	ego \
@@ -43,10 +44,11 @@ src_compile() {
 #		-a \
 #		-tags netgo \
 #		.
+	emake deploy
 }
 
 src_install() {
-	dobin fan2go
+	dobin bin/fan2go
 	dodoc README.md
 	insinto /etc/fan2go
 	doins fan2go.yaml
