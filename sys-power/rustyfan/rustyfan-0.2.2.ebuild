@@ -88,7 +88,7 @@ HOMEPAGE="https://github.com/ScottESanDiego/rustyfan"
 # Fetch source code from a specific commit in the GitHub repository
 EGIT_REPO_URI="https://github.com/ScottESanDiego/rustyfan.git"
 # Specify the exact commit hash to use
-EGIT_COMMIT="1c66f1e7e9c4329c8aae9933b2a5d3a306042dd4"
+EGIT_COMMIT="0d6b0d89539fc335799ab8d023339183d4d24839"
 
 SRC_URI="
 	${CARGO_CRATE_URIS}
