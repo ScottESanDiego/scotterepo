@@ -1,0 +1,54 @@
+#!/sbin/openrc-run
+# Copyright 1999-2025 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+description="nft-blackhole - Block IPs in nftables by country and blacklists"
+command="/usr/bin/nft-blackhole.py"
+command_args="${NFT_BLACKHOLE_OPTS}"
+command_background="false"
+pidfile="/run/${RC_SVCNAME}.pid"
+
+extra_commands="reload"
+extra_started_commands="reload"
+
+description_reload="Reload blacklists and update nftables rules"
+
+depend() {
+	need net
+	use logger
+	before firewall
+}
+
+start_pre() {
+	checkpath --directory --mode 0755 /var/lib/nft-blackhole
+
+	if [ ! -f /etc/nft-blackhole.conf ]; then
+		eerror "Configuration file /etc/nft-blackhole.conf not found"
+		return 1
+	fi
+}
+
+start() {
+	ebegin "Starting ${RC_SVCNAME}"
+	${command} start ${command_args}
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping ${RC_SVCNAME}"
+	${command} stop
+	eend $?
+}
+
+reload() {
+	ebegin "Reloading ${RC_SVCNAME}"
+	${command} reload
+	eend $?
+}
+
+restart() {
+	ebegin "Restarting ${RC_SVCNAME}"
+	${command} restart ${command_args}
+	eend $?
+}
+

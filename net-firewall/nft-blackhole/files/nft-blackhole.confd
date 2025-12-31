@@ -1,0 +1,9 @@
+# Copyright 1999-2025 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+# Configuration file for nft-blackhole OpenRC service
+
+# Additional command line options for nft-blackhole
+# See /etc/nft-blackhole.conf for main configuration
+NFT_BLACKHOLE_OPTS=""
+

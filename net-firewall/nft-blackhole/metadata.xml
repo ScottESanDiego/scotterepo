@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>maintainer@example.com</email>
+		<name>Package Maintainer</name>
+	</maintainer>
+	<longdescription lang="en">
+		nft-blackhole is a daemon for blocking IP addresses based on country
+		or blacklists, using nftables. It can download publicly available
+		blacklists and block IPs from them, block or whitelist countries,
+		whitelist specific networks or IP addresses, and supports automatic
+		retry on failed downloads with atomic operations to prevent loading
+		incomplete rulesets.
+	</longdescription>
+	<use>
+		<flag name="ipv6">Enable IPv6 support (use nftables 'inet' table for dual-stack, disable for IPv4-only 'ip' table)</flag>
+		<flag name="systemd">Install systemd service files for automatic daemon management</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">tomasz-c/nft-blackhole</remote-id>
+		<bugs-to>https://github.com/tomasz-c/nft-blackhole/issues</bugs-to>
+	</upstream>
+</pkgmetadata>
