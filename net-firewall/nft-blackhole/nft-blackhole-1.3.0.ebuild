@@ -36,6 +36,9 @@ src_prepare() {
 		sed -i 's/table inet/table ip/g' nft-blackhole.py || die "sed failed"
 		sed -i 's/table inet/table ip/g' nft-blackhole.template || die "sed failed"
 
+		# Change flush commands from inet to ip
+		sed -i 's/'\''inet'\'', '\''blackhole'\''/'\''ip'\'', '\''blackhole'\''/g' nft-blackhole.py || die "sed failed"
+
 		# Remove IPv6 sets and rules from template file
 		sed -i '/set whitelist-v6/,/^[[:space:]]*}$/d' nft-blackhole.template || die "sed failed"
 		sed -i '/set blacklist-v6/,/^[[:space:]]*}$/d' nft-blackhole.template || die "sed failed"
