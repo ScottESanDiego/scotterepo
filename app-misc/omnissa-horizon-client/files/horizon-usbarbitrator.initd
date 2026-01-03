@@ -1,0 +1,25 @@
+#!/sbin/openrc-run
+# Copyright 1999-2025 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+description="Omnissa Horizon USB Arbitrator service"
+command="/usr/lib64/omnissa/horizon/usb/horizon-eucusbarbitrator"
+command_background="yes"
+pidfile="/run/${RC_SVCNAME}.pid"
+
+depend() {
+	need localmount
+	use net logger
+	after bootmisc
+}
+
+start_pre() {
+	checkpath --directory --mode 0755 /run
+}
+
+stop() {
+	ebegin "Stopping ${RC_SVCNAME}"
+	${command} --kill
+	eend $?
+}
+

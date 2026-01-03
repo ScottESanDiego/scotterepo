@@ -1,0 +1,14 @@
+[Unit]
+Description=Omnissa Horizon Serial Port Service
+Documentation=https://docs.omnissa.com/
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/lib64/omnissa/horizon/bin/ftsprhvd
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+
