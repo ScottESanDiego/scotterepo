@@ -1,0 +1,84 @@
+--- a/nft-blackhole.py
++++ b/nft-blackhole.py
+@@ -16,6 +16,7 @@
+ from concurrent.futures import ThreadPoolExecutor, as_completed
+ from yaml import safe_load
+ import time
++import ipaddress
+ 
+ desc = 'Daemon blocking IP addresses upon country or blacklist, using nftables'
+ parser = argparse.ArgumentParser(description=desc)
+@@ -199,40 +200,59 @@
+ 
+ def whitelist_sets(reload=False):
+     '''Create whitelist sets'''
++    nft_family, nft_table = 'inet', 'blackhole'
+     for ip_ver in IP_VER:
+         set_name = f'whitelist-{ip_ver}'
+-        set_list = ', '.join(WHITELIST[ip_ver])
+-        nft_set = (Template(SET_TEMPLATE).substitute(ip_ver=f'ip{ip_ver}', set_name=set_name, ip_list=set_list))
+         if reload:
+-            run(['nft', 'flush', 'set', 'inet', 'blackhole', set_name], check=False)
++            run(['nft', 'flush', 'set', nft_family, nft_table, set_name], check=False)
+         if WHITELIST[ip_ver]:
+-            run(['nft', '-f', '-'], input=nft_set.encode(), check=True)
++            for i in range(0, len(WHITELIST[ip_ver]), 1000):
++                chunk = ', '.join(WHITELIST[ip_ver][i:i+1000])
++                run(['nft', '-f', '-'], input=f"add element {nft_family} {nft_table} {set_name} {{ {chunk} }}\n".encode(), check=True)
+ 
+ 
+ def blacklist_sets(ip_data, reload=False):
+     '''Create blacklist sets'''
++    nft_family, nft_table = 'inet', 'blackhole'
+     for ip_ver in IP_VER:
+         set_name = f'blacklist-{ip_ver}'
+         ip_list = ip_data['blacklist'][ip_ver]
+-        set_list = ', '.join(ip_list)
+-        nft_set = (Template(SET_TEMPLATE).substitute(ip_ver=f'ip{ip_ver}', set_name=set_name, ip_list=set_list))
++        nets = []
++        for ip in ip_list:
++            if ip.strip():
++                try:
++                    nets.append(ipaddress.ip_network(ip.strip()))
++                except ValueError:
++                    pass
+         if reload:
+-            run(['nft', 'flush', 'set', 'inet', 'blackhole', set_name], check=False)
+-        if ip_list:
+-            run(['nft', '-f', '-'], input=nft_set.encode(), check=True)
++            run(['nft', 'flush', 'set', nft_family, nft_table, set_name], check=False)
++        collapsed = list(ipaddress.collapse_addresses(nets))
++        if collapsed:
++            for i in range(0, len(collapsed), 1000):
++                chunk = ', '.join(str(net) for net in collapsed[i:i+1000])
++                run(['nft', '-f', '-'], input=f"add element {nft_family} {nft_table} {set_name} {{ {chunk} }}\n".encode(), check=True)
+ 
+ 
+ def country_sets(ip_data, reload=False):
+     '''Create country sets'''
++    nft_family, nft_table = 'inet', 'blackhole'
+     for ip_ver in IP_VER:
+         set_name = f'country-{ip_ver}'
+         ip_list = ip_data['country'][ip_ver]
+-        set_list = ', '.join(ip_list)
+-        nft_set = (Template(SET_TEMPLATE).substitute(ip_ver=f'ip{ip_ver}', set_name=set_name, ip_list=set_list))
++        nets = []
++        for ip in ip_list:
++            if ip.strip():
++                try:
++                    nets.append(ipaddress.ip_network(ip.strip()))
++                except ValueError:
++                    pass
+         if reload:
+-            run(['nft', 'flush', 'set', 'inet', 'blackhole', set_name], check=False)
+-        if ip_list:
+-            run(['nft', '-f', '-'], input=nft_set.encode(), check=True)
++            run(['nft', 'flush', 'set', nft_family, nft_table, set_name], check=False)
++        collapsed = list(ipaddress.collapse_addresses(nets))
++        if collapsed:
++            for i in range(0, len(collapsed), 1000):
++                chunk = ', '.join(str(net) for net in collapsed[i:i+1000])
++                run(['nft', '-f', '-'], input=f"add element {nft_family} {nft_table} {set_name} {{ {chunk} }}\n".encode(), check=True)
+ 
+ 
+ def fetch_all_lists():
