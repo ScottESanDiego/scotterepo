@@ -2,8 +2,12 @@
 <!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
 <maintainer type="person">
-<email>scotte@warped.com</email>
+	<email>scotte@warped.com</email>
 </maintainer>
+<upstream>
+	<remote-id type="codeberg">scotte/esp_sync</remote-id>
+	<remote-id type="github">ScottESanDiego/esp_sync</remote-id>
+</upstream>
 <longdescription lang="en">
 </longdescription>
 </pkgmetadata>
