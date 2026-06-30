@@ -2,18 +2,15 @@
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
 	<maintainer type="person">
-		<email>maintainer@example.com</email>
-		<name>Your Name</name>
+		<email>scotte@warped.com</email>
+		<name>Scott Ellis</name>
 	</maintainer>
 	<longdescription lang="en">
-		Amazon DCV is a high-performance remote display protocol that provides 
-		customers with a secure way to deliver remote desktops and application 
-		streaming from any cloud or data center to any device, over varying 
-		network conditions. This package contains the DCV client viewer application.
+		Amazon DCV is a high-performance remote display protocol that provides
+		secure remote desktops and application streaming across varying network
+		conditions. This package installs the DCV client viewer.
 	</longdescription>
 	<upstream>
-		<remote-id type="github">aws/dcv</remote-id>
 		<doc lang="en">https://docs.aws.amazon.com/dcv/</doc>
 	</upstream>
 </pkgmetadata>
-
