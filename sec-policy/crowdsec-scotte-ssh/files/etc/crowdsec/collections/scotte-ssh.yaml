@@ -1,0 +1,9 @@
+name: scotte/ssh
+parsers:
+  - custom/ssh-timeout
+description: "SSH timeout detection parser"
+author: scotte
+tags:
+  - security_engine
+  - linux
+  - ssh

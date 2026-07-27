@@ -1,0 +1,15 @@
+filter: "evt.Parsed.program == 'sshd'"
+onsuccess: next_stage
+name: custom/ssh-timeout
+description: "Parse SSH timeout before authentication as a failed auth"
+nodes:
+  - grok:
+      pattern: "^Timeout before authentication for connection from %{IP:source_ip} to %{IP:target_ip}, pid = %{NUMBER:pid}"
+      apply_on: message
+statics:
+  - meta: log_type
+    value: ssh_failed-auth
+  - meta: source_ip
+    expression: "evt.Parsed.source_ip"
+  - meta: target_ip
+    expression: "evt.Parsed.target_ip"
