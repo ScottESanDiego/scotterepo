@@ -1,0 +1,200 @@
+type: leaky
+name: scotte/exim-smtp-auth-bf
+description: "Detect repeated Exim SMTP AUTH failures from one IP"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_failed_auth'"
+groupby: evt.Meta.source_ip
+capacity: 1
+leakspeed: "10m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1110
+  behavior: "smtp:bruteforce"
+  label: "Exim SMTP AUTH bruteforce"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-auth-user-enum
+description: "Detect Exim SMTP AUTH attempts against multiple users from one IP"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_failed_auth'"
+groupby: evt.Meta.source_ip
+distinct: evt.Meta.username
+capacity: 1
+leakspeed: "30m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1110
+  behavior: "smtp:bruteforce"
+  label: "Exim SMTP AUTH user enumeration"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-rcpt-unrouteable-spray
+description: "Detect Exim clients probing multiple unrouteable recipients"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_rcpt_unrouteable'"
+groupby: evt.Meta.source_ip
+distinct: evt.Meta.rcpt_to
+capacity: 1
+leakspeed: "30m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "smtp:scan"
+  label: "Exim SMTP unrouteable RCPT spray"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-auth-not-advertised
+description: "Detect Exim clients trying AUTH when AUTH was not advertised"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_auth_not_advertised'"
+groupby: evt.Meta.source_ip
+capacity: 1
+leakspeed: "10m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "smtp:scan"
+  label: "Exim SMTP AUTH not advertised"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-auth-no-mail-probe
+description: "Detect Exim clients disconnecting without MAIL after AUTH probing"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_no_mail_auth_probe'"
+groupby: evt.Meta.source_ip
+capacity: 1
+leakspeed: "10m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "smtp:scan"
+  label: "Exim SMTP AUTH no-MAIL probe"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-starttls-not-advertised
+description: "Detect Exim clients trying STARTTLS when STARTTLS was not advertised"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_starttls_not_advertised'"
+groupby: evt.Meta.source_ip
+capacity: 1
+leakspeed: "10m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "smtp:scan"
+  label: "Exim SMTP STARTTLS not advertised"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-starttls-no-mail-probe
+description: "Detect Exim clients disconnecting without MAIL after STARTTLS probing"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_no_mail_starttls_probe'"
+groupby: evt.Meta.source_ip
+capacity: 1
+leakspeed: "10m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "smtp:scan"
+  label: "Exim SMTP STARTTLS no-MAIL probe"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-tls-error
+description: "Detect Exim clients breaking TLS negotiation"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_tls_error'"
+groupby: evt.Meta.source_ip
+capacity: 1
+leakspeed: "10m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "smtp:scan"
+  label: "Exim SMTP TLS negotiation error"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-protocol-drop
+description: "Detect Exim dropping a client after too many SMTP syntax or protocol errors"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_smtp_too_many_errors'"
+groupby: evt.Meta.source_ip
+capacity: 1
+leakspeed: "30m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "smtp:scan"
+  label: "Exim SMTP protocol abuse"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-nul-syntax
+description: "Detect repeated NUL-byte SMTP syntax errors, often TLS sent to plain SMTP"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_smtp_nul_syntax'"
+groupby: evt.Meta.source_ip
+capacity: 1
+leakspeed: "10m"
+blackhole: 10m
+labels:
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "smtp:scan"
+  label: "Exim SMTP NUL-byte syntax abuse"
+  remediation: true
+  service: smtp
+---
+type: leaky
+name: scotte/exim-smtp-empty-session
+description: "Detect Exim SMTP sessions that disconnect without MAIL"
+filter: "evt.Meta.service == 'exim' && evt.Meta.log_type == 'exim_no_mail_connection'"
+groupby: evt.Meta.source_ip
+capacity: 1
+leakspeed: "10m"
+blackhole: 10m
+labels:
+  confidence: 2
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "smtp:scan"
+  label: "Exim empty SMTP session"
+  remediation: true
+  service: smtp
+

@@ -1,0 +1,130 @@
+name: scotte/exim-auth-abuse
+description: "Parse Exim SMTP AUTH and protocol abuse from syslog maillog"
+filter: "evt.Parsed.program == 'exim'"
+onsuccess: next_stage
+pattern_syntax:
+  NO_END_PAR: '[^\)]+'
+  NO_GT: '[^>]*'
+  EXIM_AUTH_NAME: '[A-Za-z0-9_-]+'
+  EXIM_SOURCE: '(?:H=)?(?:%{HOSTNAME:source_dns} )?(?:\(%{NO_END_PAR:source_helo}\) )?\[%{IP:source_ip}\](?::%{POSINT:source_port})?'
+  EXIM_LOCAL: 'I=\[%{IP:local_ip}\]:%{POSINT:local_port}'
+  EXIM_CI: 'Ci=%{POSINT:connection_id}'
+nodes:
+  - grok:
+      pattern: '%{EXIM_AUTH_NAME:exim_auth} authenticator failed for %{EXIM_SOURCE} %{EXIM_LOCAL} %{EXIM_CI}: 535 Incorrect authentication data \(set_id=%{NO_END_PAR:target_user}\)'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_failed_auth
+        - meta: username
+          expression: evt.Parsed.target_user
+        - meta: auth_name
+          expression: evt.Parsed.exim_auth
+  - grok:
+      pattern: '%{EXIM_SOURCE} %{EXIM_LOCAL} %{EXIM_CI} F=<%{NO_GT:mail_from}> rejected RCPT <%{NO_GT:rcpt_to}>: Unrouteable address'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_rcpt_unrouteable
+        - meta: username
+          expression: evt.Parsed.rcpt_to
+        - meta: rcpt_to
+          expression: evt.Parsed.rcpt_to
+        - meta: mail_from
+          expression: evt.Parsed.mail_from
+  - grok:
+      pattern: 'SMTP protocol error in "%{DATA:smtp_command}" %{EXIM_SOURCE} %{EXIM_LOCAL} %{EXIM_CI} AUTH command used when not advertised'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_auth_not_advertised
+        - meta: smtp_command
+          expression: evt.Parsed.smtp_command
+  - grok:
+      pattern: 'SMTP protocol error in "%{DATA:smtp_command}" %{EXIM_SOURCE} %{EXIM_LOCAL} %{EXIM_CI} STARTTLS command used when not advertised'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_starttls_not_advertised
+        - meta: smtp_command
+          expression: evt.Parsed.smtp_command
+  - grok:
+      pattern: 'TLS error \(%{DATA:tls_operation}\): on connection %{EXIM_CI} from %{EXIM_SOURCE} %{EXIM_LOCAL} error:%{DATA:tls_error_code}:SSL routines::%{GREEDYDATA:tls_error}'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_tls_error
+        - meta: tls_operation
+          expression: evt.Parsed.tls_operation
+        - meta: tls_error
+          expression: evt.Parsed.tls_error
+  - grok:
+      pattern: 'TLS error on connection %{EXIM_CI} from %{EXIM_SOURCE} %{EXIM_LOCAL} \(%{DATA:tls_operation}\): %{GREEDYDATA:tls_error}'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_tls_error
+        - meta: tls_operation
+          expression: evt.Parsed.tls_operation
+        - meta: tls_error
+          expression: evt.Parsed.tls_error
+  - grok:
+      pattern: 'no MAIL in SMTP connection from %{EXIM_SOURCE} %{EXIM_LOCAL} %{EXIM_CI} D=%{NUMBER:duration}s(?: X=%{NOTSPACE:tls_cipher} CV=%{WORD:cert_verify})? C=%{DATA:smtp_commands_prefix}STARTTLS%{GREEDYDATA:smtp_commands_suffix}'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_no_mail_starttls_probe
+        - meta: smtp_commands
+          expression: evt.Parsed.smtp_commands_prefix + "STARTTLS" + evt.Parsed.smtp_commands_suffix
+  - grok:
+      pattern: 'no MAIL in SMTP connection from %{EXIM_SOURCE} %{EXIM_LOCAL} %{EXIM_CI} D=%{NUMBER:duration}s(?: X=%{NOTSPACE:tls_cipher} CV=%{WORD:cert_verify})? C=%{DATA:smtp_commands_prefix}AUTH%{GREEDYDATA:smtp_commands_suffix}'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_no_mail_auth_probe
+        - meta: smtp_commands
+          expression: evt.Parsed.smtp_commands_prefix + "AUTH" + evt.Parsed.smtp_commands_suffix
+  - grok:
+      pattern: 'SMTP syntax error in "%{GREEDYDATA:smtp_command}" %{EXIM_SOURCE} %{EXIM_LOCAL} %{EXIM_CI} NUL character\(s\) present \(shown as ''\?''\)'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_smtp_nul_syntax
+        - meta: smtp_command
+          expression: evt.Parsed.smtp_command
+  - grok:
+      pattern: 'SMTP call from %{EXIM_SOURCE} %{EXIM_LOCAL} %{EXIM_CI} dropped: too many syntax or protocol errors%{GREEDYDATA:drop_detail}'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_smtp_too_many_errors
+  - grok:
+      pattern: 'SMTP connection %{EXIM_CI} from %{EXIM_SOURCE} %{EXIM_LOCAL} lost D=%{NUMBER:duration}s'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_smtp_connection_lost
+  - grok:
+      pattern: 'no MAIL in SMTP connection from %{EXIM_SOURCE} %{EXIM_LOCAL} %{EXIM_CI} D=%{NUMBER:duration}s$'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: exim_no_mail_connection
+statics:
+  - meta: service
+    value: exim
+  - meta: source_ip
+    expression: evt.Parsed.source_ip
+  - meta: source_port
+    expression: evt.Parsed.source_port
+  - meta: source_dns
+    expression: evt.Parsed.source_dns
+  - meta: source_helo
+    expression: evt.Parsed.source_helo
+  - parsed: local_ip
+    expression: evt.Parsed.local_ip
+  - parsed: local_port
+    expression: evt.Parsed.local_port
+  - parsed: connection_id
+    expression: evt.Parsed.connection_id
+

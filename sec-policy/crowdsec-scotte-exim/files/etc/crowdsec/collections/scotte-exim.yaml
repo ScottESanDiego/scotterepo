@@ -1,0 +1,22 @@
+name: scotte/exim
+parsers:
+  - scotte/exim-auth-abuse
+scenarios:
+  - scotte/exim-smtp-auth-bf
+  - scotte/exim-smtp-auth-user-enum
+  - scotte/exim-smtp-rcpt-unrouteable-spray
+  - scotte/exim-smtp-auth-not-advertised
+  - scotte/exim-smtp-auth-no-mail-probe
+  - scotte/exim-smtp-starttls-not-advertised
+  - scotte/exim-smtp-starttls-no-mail-probe
+  - scotte/exim-smtp-tls-error
+  - scotte/exim-smtp-protocol-drop
+  - scotte/exim-smtp-nul-syntax
+  - scotte/exim-smtp-empty-session
+description: "Exim SMTP abuse detection: parsers and scenarios"
+author: scotte
+tags:
+  - security_engine
+  - linux
+  - exim
+  - smtp

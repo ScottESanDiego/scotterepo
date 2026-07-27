@@ -1,0 +1,16 @@
+name: scotte/exim-syslog-fix
+description: "Pre-process Exim logs to remove non-standard syslog headers before s01"
+filter: "evt.Line.Raw contains 'exim['"
+onsuccess: next_stage
+nodes:
+  - grok:
+      # This strips the timestamp, hostname, and PID out of the raw line
+      pattern: "^%{SYSLOGTIMESTAMP:timestamp} %{DATA:hostname} exim\\[%{NUMBER:pid}\\]: %{GREEDYDATA:message_content}"
+      apply_on: Line.Raw
+      statics:
+        # Tell the next stage that this is definitely an Exim log
+        - target: evt.Parsed.program
+          value: "exim"
+        # Pass ONLY the cleaned Exim message to the next stage
+        - target: evt.Parsed.message
+          expression: "evt.Parsed.message_content"
