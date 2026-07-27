@@ -4,7 +4,7 @@ DESCRIPTION="Crowdsec collection: SSH timeout detection"
 HOMEPAGE="https://scotte.ai/"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS="~amd64 ~arm64"
 
 RDEPEND=">=net-analyzer/crowdsec-1.7.8-r1"
 

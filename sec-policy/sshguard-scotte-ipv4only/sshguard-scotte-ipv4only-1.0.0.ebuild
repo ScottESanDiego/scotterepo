@@ -4,7 +4,7 @@ DESCRIPTION="SSHGuard nftables firewall script for IPv4 only"
 HOMEPAGE="https://scotte.ai/"
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS="~amd64 ~arm64"
 
 RDEPEND=">=app-admin/sshguard-2.5.1"
 
