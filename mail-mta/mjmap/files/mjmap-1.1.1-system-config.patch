@@ -1,0 +1,95 @@
+From: Gentoo mjmap maintainers
+Subject: Use the system mjmap configuration as the final fallback
+
+Preserve the command-line and environment overrides while making the
+distribution-provided private configuration the default.  Keep the path in a
+string variable so Prefix builds can set it with the Go linker's -X option.
+
+--- a/README.md
++++ b/README.md
+@@ -18,8 +18,8 @@ gmake -C mjmap PREFIX=~/.local
+ ## Configuration
+ 
+ mjmap uses the configuration file specified by `-c` or `--config`. If the
+-option is omitted, it uses the path in `$MJMAP_CONFIG` when set, then falls
+-back to `$XDG_CONFIG_HOME/mjmap/config.scfg`.
++option is omitted, it uses the path in `$MJMAP_CONFIG` when set, then falls
++back to `/etc/mail/mjmap`.
+ 
+ The configuration file is very short:
+ 
+--- a/config.go
++++ b/config.go
+@@ -4,11 +4,9 @@ import (
+ 	"fmt"
+ 	"os"
+ 	"os/exec"
+-	"path"
+ 	"strings"
+ 
+ 	"codeberg.org/emersion/go-scfg"
+-	"git.sr.ht/~rockorager/mjmap/xdg"
+ )
+ 
+ type account struct {
+@@ -21,6 +19,8 @@ type account struct {
+ 	passwordCmd string
+ }
+ 
++var defaultConfigPath = "/etc/mail/mjmap"
++
+ func resolveConfigPath(pathArg string) string {
+ 	// Use the flag first and foremost
+ 	if pathArg != "" {
+@@ -33,8 +33,8 @@ func resolveConfigPath(pathArg string) string {
+ 	configPath := os.Getenv("MJMAP_CONFIG")
+ 
+-	// Use XDG_CONFIG_HOME
++	// Use the system configuration
+ 	if configPath == "" {
+-		configPath = path.Join(xdg.ConfigPath(), "mjmap", "config.scfg")
++		configPath = defaultConfigPath
+ 	}
+ 
+ 	return configPath
+--- a/config_test.go
++++ b/config_test.go
+@@ -1,16 +1,10 @@
+ package main
+ 
+ import (
+-	"path"
+ 	"testing"
+-
+-	"git.sr.ht/~rockorager/mjmap/xdg"
+ )
+ 
+ func TestResolveConfigPath(t *testing.T) {
+-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+-	defaultPath := path.Join(xdg.ConfigPath(), "mjmap", "config.scfg")
+-
+ 	tests := []struct {
+ 		name    string
+ 		pathArg string
+@@ -30,7 +24,7 @@ func TestResolveConfigPath(t *testing.T) {
+ 		},
+ 		{
+ 			name: "empty environment uses default",
+-			want: defaultPath,
++			want: defaultConfigPath,
+ 		},
+ 	}
+ 
+--- a/mjmap.1.scd
++++ b/mjmap.1.scd
+@@ -52,8 +52,8 @@ _<recipient...>_
+ 
+ The *-c*, *--config* option specifies the configuration file. If the option is
+ omitted, mjmap uses the path in _MJMAP_CONFIG_ when set, then falls back to
+-_$XDG_CONFIG_HOME/mjmap/config.scfg_. You will find a sample configuration file
+-in _/usr/share/mjmap/sample_config.scfg_.
++_/etc/mail/mjmap_. The Gentoo package installs a sample configuration at that
++path.
+ 
+ The file format is SCFG: _https://git.sr.ht/~emersion/scfg_.
+ 

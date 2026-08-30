@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>scotte@warped.com</email>
+	</maintainer>
+	<use>
+		<flag name="mta">Install a sendmail-compatible system MTA command</flag>
+	</use>
+	<longdescription lang="en">
+		mjmap submits messages through a JMAP server using the
+		EmailSubmission resource. It accepts a sendmail-compatible command
+		line and reads RFC-formatted messages from standard input.
+	</longdescription>
+	<upstream>
+		<remote-id type="sourcehut">~rockorager/mjmap</remote-id>
+	</upstream>
+</pkgmetadata>
