@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>scotte@warped.com</email>
+		<name>Scott Ellis</name>
+	</maintainer>
+	<longdescription lang="en">
+		Calibre-Web-Helper imports EPUB and KEPUB files into an existing
+		Calibre library and manages their Calibre-Web shelf membership.
+	</longdescription>
+	<upstream>
+		<remote-id type="github">ScottESanDiego/Calibre-Web-Helper</remote-id>
+	</upstream>
+</pkgmetadata>
