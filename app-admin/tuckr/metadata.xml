@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>scotte@warped.com</email>
+		<name>Scott Ellis</name>
+	</maintainer>
+	<longdescription lang="en">
+		Tuckr manages grouped dotfiles through symlinks and supports hooks,
+		profiles, conditional targets, and encrypted secrets.
+	</longdescription>
+	<upstream>
+		<remote-id type="github">RaphGL/Tuckr</remote-id>
+	</upstream>
+</pkgmetadata>
